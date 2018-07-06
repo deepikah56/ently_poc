@@ -1,0 +1,3 @@
+Browser=chrome
+ChromeDriver=/bin/chromedriver
+Url=http://gitviz.qwinix.net

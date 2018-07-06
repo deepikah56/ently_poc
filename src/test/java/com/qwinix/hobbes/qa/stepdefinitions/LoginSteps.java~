@@ -1,0 +1,79 @@
+package com.qwinix.hobbes.qa.stepdefinitions;
+import java.util.List;
+
+import org.junit.Assert;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+
+import com.qwinix.hobbes.qa.BaseDriver;
+import com.qwinix.hobbes.qa.page.LoginPage;
+import com.qwinix.hobbes.qa.steps.ConfigReader;
+public class LoginSteps {
+
+public static JavascriptExecutor js;
+WebDriver driver = BaseDriver.driver;
+ConfigReader config = new ConfigReader();
+LoginPage objLP = new  LoginPage();
+
+
+public void openurl() {
+		driver.get(config.getUrl());
+		driver.manage().window().maximize();
+		
+}
+
+public void login() {
+   objLP.loginbutton.click();
+   objLP.email.sendKeys("qwinix@yopmail.com");
+   objLP.password.sendKeys("Qwinix123!");
+   objLP.submit.click();
+}
+
+
+public void access_token() {
+	String actual = driver.findElement(By.xpath("//h3[text()='Repositories and Commits:']")).getText();
+	System.out.println("actualvalue is = "+actual);
+	Assert.assertEquals("Repositories and Commits:", actual);
+	
+	JavascriptExecutor js = (JavascriptExecutor)driver;
+	Object test= (js.executeScript("return localStorage.getItem('access_token')"));
+	String token_id = (test).toString();
+	String email = ("qwinix@yopmail.com").toString();
+	Response repoNcommits = RestAssured.given().baseUri("http://gitviz.qwinix.net:8000").basePath("singleRepoNCommits/q-dash").header("Authorization","Bearer "+token_id)
+	.contentType("application/json").log().body().
+	when().get();
+	ResponseBody rbody = repoNcommits.getBody();
+	System.out.println(rbody.asString());
+}
+
+public void fetchdata() throws InterruptedException {
+	  Thread.sleep(4000);
+	  driver.findElement(By.xpath("//*[name()='svg']/*[name()='g'][4]//*[name()='rect'][1]")).click();
+	  Thread.sleep(4000);
+	  int sizeoflist = driver.findElements(By.xpath("(//*[name()='svg']/*[name()='g']//*[name()='circle'])")).size();
+	   System.out.println(sizeoflist);
+	   for(int i=1;i<=sizeoflist;i++)
+	{
+		
+		WebElement individualbar_graph = driver.findElement(By.xpath("(//*[name()='svg']/*[name()='g']//*[name()='circle'])[" + i +"]")); 
+		objLP.onMouseOver(individualbar_graph);
+  		String text = objLP.getdata.getText();
+  		System.out.println(text);
+  		Thread.sleep(3000);
+	}  
+  
+}
+	
+}
+
